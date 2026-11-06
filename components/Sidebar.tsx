@@ -36,20 +36,8 @@ export default function Sidebar({
       </Link>
     );
   };
-  const main = items.filter((i) => !i.more);
-  const more = items.filter((i) => i.more);
-  const moreActive = more.some((i) => pathname.startsWith(i.href));
-
   const nav = (
-    <nav className="flex-1 space-y-1 px-3 py-4">
-      {main.map(link)}
-      {more.length ? (
-        <details open={moreActive} className="pt-2">
-          <summary className="cursor-pointer rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100">Mai multe</summary>
-          <div className="mt-1 space-y-1 border-l border-slate-200 pl-2">{more.map(link)}</div>
-        </details>
-      ) : null}
-    </nav>
+    <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">{items.map(link)}</nav>
   );
 
   const footer = (
