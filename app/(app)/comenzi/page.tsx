@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { canRead, hasFinance, isStaff, requireActive } from "@/lib/session";
+import { canRead, hasFinance, isAdmin, isStaff, requireActive } from "@/lib/session";
 import { Badge, Empty, Field, Flash, PageHeader, Pagination, Select, btnCls, btnGhost, inputCls, td, th } from "@/components/ui";
 import { createOrder } from "@/app/actions";
+import { deleteOrder } from "@/app/delete-order";
 import { markOrderPaid } from "@/app/stage2-actions";
 import { PAY_METHOD } from "@/lib/finance";
 import { fmtDate, fmtRON, todayISO } from "@/lib/format";
@@ -16,6 +17,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
   const write = isStaff(profile);
   const money = canRead(profile);
   const canPay = hasFinance(profile);
+  const admin = isAdmin(profile);
   const today = todayISO();
 
   const page = Math.max(1, Number(sp.pagina) || 1);
@@ -136,6 +138,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
                 {money ? <th className={th}>Total</th> : null}
                 {money ? <th className={th}>Financiar</th> : null}
                 {canPay ? <th className={th}>Încasare</th> : null}
+                {admin ? <th className={th}></th> : null}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -166,6 +169,19 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
                             <button className="rounded-md bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Încasat</button>
                           </form>
                         )}
+                      </td>
+                    ) : null}
+                    {admin ? (
+                      <td className={td}>
+                        <details className="relative">
+                          <summary className="cursor-pointer list-none rounded-md border border-red-200 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50">Șterge</summary>
+                          <form action={deleteOrder} className="absolute right-0 z-10 mt-1 w-56 rounded-lg border border-red-200 bg-white p-3 shadow-lg">
+                            <input type="hidden" name="id" value={o.id} />
+                            <input type="hidden" name="confirm" value="on" />
+                            <p className="mb-2 text-xs text-slate-600">Ștergi definitiv comanda #{o.number} ({o.client_name}), cu creativele și facturile ei?</p>
+                            <button className="rounded-md bg-red-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-red-700">Da, șterge</button>
+                          </form>
+                        </details>
                       </td>
                     ) : null}
                   </tr>
