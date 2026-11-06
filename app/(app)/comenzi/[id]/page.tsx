@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { canRead, isAdmin, isStaff, requireActive } from "@/lib/session";
+import { canRead, hasFinance, isAdmin, isStaff, requireActive } from "@/lib/session";
 import { Badge, Card, Empty, Field, Flash, PageHeader, Select, btnCls, btnGhost, btnSmall, inputCls, td, th } from "@/components/ui";
 import { deleteOrder } from "@/app/delete-order";
+import { markOrderSent } from "@/app/order-quick";
+import { markOrderPaid } from "@/app/stage2-actions";
 import { addCreatives, bulkCreativeStatus, updateCreative, updateOrder, updateOrderEditor } from "@/app/actions";
 import { fmtDate, fmtDateTime, fmtRON, todayISO } from "@/lib/format";
 import { CREATIVE_STATUS, FINANCIAL, ORDER_STATUS, PACKAGES } from "@/lib/constants";
@@ -24,6 +26,7 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
   const write = isStaff(profile);
   const isEditor = profile.role === "editor";
   const money = canRead(profile);
+  const canPay = hasFinance(profile);
   const today = todayISO();
 
   const [orderR, creativesR, usersR] = await Promise.all([
@@ -49,6 +52,25 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
           <>
             <Badge value={o.status}>{ORDER_STATUS[o.status]}</Badge>
             {late ? <Badge tone="red">Întârziată</Badge> : null}
+            {write && o.status !== "anulata" ? (
+              <form action={markOrderSent}>
+                <input type="hidden" name="back" value={back} />
+                <input type="hidden" name="order_id" value={id} />
+                {o.status === "livrata" ? <input type="hidden" name="undo" value="1" /> : null}
+                <button className={o.status === "livrata" ? "rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50" : "rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700"}>
+                  {o.status === "livrata" ? "✓ Trimisă (readu în lucru)" : "Comandă trimisă"}
+                </button>
+              </form>
+            ) : null}
+            {canPay && o.status !== "anulata" && o.financial_status !== "incasata" ? (
+              <form action={markOrderPaid} className="flex items-center gap-1">
+                <input type="hidden" name="back" value={back} />
+                <input type="hidden" name="order_id" value={id} />
+                <input type="hidden" name="method" value="ramburs" />
+                <button className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Încasat</button>
+              </form>
+            ) : null}
+            {o.financial_status === "incasata" ? <Badge tone="green">Încasată</Badge> : null}
             <Link href="/comenzi" className={btnGhost}>← Comenzi</Link>
             {!isEditor ? <Link href={`/clienti/${o.client_id}`} className={btnGhost}>Vezi clientul</Link> : null}
           </>

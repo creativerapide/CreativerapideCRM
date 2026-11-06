@@ -5,6 +5,7 @@ import { Badge, Empty, Field, Flash, PageHeader, Pagination, Select, btnCls, btn
 import { createOrder } from "@/app/actions";
 import { deleteOrder } from "@/app/delete-order";
 import { markOrderPaid } from "@/app/stage2-actions";
+import { markOrderSent } from "@/app/order-quick";
 import { PAY_METHOD } from "@/lib/finance";
 import { fmtDate, fmtRON, todayISO } from "@/lib/format";
 import { FINANCIAL, ORDER_STATUS, PACKAGES, PAGE_SIZE } from "@/lib/constants";
@@ -137,6 +138,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
                 <th className={th}>Creative</th>
                 {money ? <th className={th}>Total</th> : null}
                 {money ? <th className={th}>Financiar</th> : null}
+                {write ? <th className={th}>Trimitere</th> : null}
                 {canPay ? <th className={th}>Încasare</th> : null}
                 {admin ? <th className={th}></th> : null}
               </tr>
@@ -155,6 +157,27 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
                     <td className={td}>{o.creatives_count}</td>
                     {money ? <td className={td}>{fmtRON(o.total)}</td> : null}
                     {money ? <td className={td}><Badge value={o.financial_status}>{FINANCIAL[o.financial_status]}</Badge></td> : null}
+                    {write ? (
+                      <td className={td}>
+                        {o.status === "anulata" ? (
+                          <span className="text-xs text-slate-400">—</span>
+                        ) : o.status === "livrata" ? (
+                          <form action={markOrderSent} className="flex items-center gap-1">
+                            <input type="hidden" name="back" value={base} />
+                            <input type="hidden" name="order_id" value={o.id} />
+                            <input type="hidden" name="undo" value="1" />
+                            <span className="text-xs font-medium text-emerald-600">✓ trimisă</span>
+                            <button className="rounded-md border border-slate-300 px-1.5 py-0.5 text-[11px] text-slate-500 hover:bg-slate-50" title="Readu în lucru">↩</button>
+                          </form>
+                        ) : (
+                          <form action={markOrderSent}>
+                            <input type="hidden" name="back" value={base} />
+                            <input type="hidden" name="order_id" value={o.id} />
+                            <button className="rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-indigo-700">Trimisă</button>
+                          </form>
+                        )}
+                      </td>
+                    ) : null}
                     {canPay ? (
                       <td className={td}>
                         {o.financial_status === "incasata" || o.status === "anulata" ? (
