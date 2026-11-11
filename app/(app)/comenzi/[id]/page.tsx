@@ -6,6 +6,7 @@ import { Badge, Card, Empty, Field, Flash, PageHeader, Select, btnCls, btnGhost,
 import { deleteOrder } from "@/app/delete-order";
 import { markOrderSent } from "@/app/order-quick";
 import { markOrderPaid } from "@/app/stage2-actions";
+import { addEditorWork, deleteEditorWork } from "@/app/editors-actions";
 import { addCreatives, bulkCreativeStatus, updateCreative, updateOrder, updateOrderEditor } from "@/app/actions";
 import { fmtDate, fmtDateTime, fmtRON, todayISO } from "@/lib/format";
 import { CREATIVE_STATUS, FINANCIAL, ORDER_STATUS, PACKAGES } from "@/lib/constants";
@@ -29,15 +30,22 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
   const canPay = hasFinance(profile);
   const today = todayISO();
 
-  const [orderR, creativesR, usersR] = await Promise.all([
+  const [orderR, creativesR, usersR, edsR, workR] = await Promise.all([
     supabase.from("orders").select("*").eq("id", id).maybeSingle(),
     supabase.from("creatives").select("*").eq("order_id", id).order("created_at", { ascending: true }),
     supabase.from("profiles").select("id, full_name").eq("active", true).neq("role", "viewer"),
+    canPay ? supabase.from("editors").select("id, name, rate, active").order("name") : Promise.resolve({ data: [] as Row[] }),
+    canPay ? supabase.from("editor_work").select("id, editor_id, creatives, rate, amount, work_date, notes, editors(name)").eq("order_id", id).order("created_at", { ascending: true }) : Promise.resolve({ data: [] as Row[] }),
   ]);
   const o: Row | null = orderR.data;
   if (!o) notFound();
   const creatives: Row[] = creativesR.data ?? [];
   const users: Row[] = usersR.data ?? [];
+  const allEditors: Row[] = edsR.data ?? [];
+  const work: Row[] = workR.data ?? [];
+  const workDone = work.reduce((a, w) => a + Number(w.creatives), 0);
+  const workTotal = work.reduce((a, w) => a + Number(w.amount), 0);
+  const workLeft = Math.max(0, Number(o?.creatives_count ?? 0) - workDone);
   const back = `/comenzi/${id}`;
   const editorName = (uid: string | null) => users.find((u) => u.id === uid)?.full_name ?? "—";
   const late = o.deadline && o.deadline < today && !["livrata", "anulata"].includes(o.status);
@@ -206,6 +214,69 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
           )}
         </Card>
       </div>
+
+      {canPay ? (
+        <Card title="Editori pe această comandă (cât are de primit fiecare)" className="mt-6">
+          <p className="mb-3 text-sm text-slate-600">
+            {workDone} din {o.creatives_count} creative atribuite editorilor
+            {workLeft > 0 ? <> · <strong className="text-amber-700">{workLeft} neatribuite</strong></> : null}
+            {work.length ? <> · de plătit editorilor: <strong className="text-slate-900">{fmtRON(workTotal)}</strong></> : null}
+          </p>
+          {work.length > 0 ? (
+            <div className="mb-4 overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-100">
+                <thead>
+                  <tr>
+                    <th className={th}>Editor</th>
+                    <th className={th}>Creative</th>
+                    <th className={th}>Tarif</th>
+                    <th className={th}>Total</th>
+                    <th className={th}>Data</th>
+                    <th className={th}></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {work.map((w) => (
+                    <tr key={w.id}>
+                      <td className={td}><Link className="text-indigo-700 hover:underline" href={`/editori/${w.editor_id}`}>{(Array.isArray(w.editors) ? w.editors[0] : w.editors)?.name ?? "—"}</Link>{w.notes ? <div className="text-xs text-slate-500">{w.notes}</div> : null}</td>
+                      <td className={td}>{w.creatives}</td>
+                      <td className={td}>{fmtRON(w.rate)}</td>
+                      <td className={`${td} font-medium text-slate-900`}>{fmtRON(w.amount)}</td>
+                      <td className={td}>{fmtDate(w.work_date)}</td>
+                      <td className={td}>
+                        <form action={deleteEditorWork}>
+                          <input type="hidden" name="back" value={back} />
+                          <input type="hidden" name="id" value={w.id} />
+                          <button className={btnSmall}>Șterge</button>
+                        </form>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+          {allEditors.filter((e) => e.active).length === 0 ? (
+            <p className="text-sm text-slate-500">Nu ai niciun editor activ. <Link className="text-indigo-700 underline" href="/editori">Adaugă editori aici</Link>.</p>
+          ) : (
+            <form action={addEditorWork} className="grid gap-3 rounded-lg bg-slate-50 p-3 sm:grid-cols-4">
+              <input type="hidden" name="back" value={back} />
+              <input type="hidden" name="order_id" value={id} />
+              <Field label="Editor">
+                <select name="editor_id" required defaultValue="" className={inputCls}>
+                  <option value="" disabled>Alege editorul</option>
+                  {allEditors.filter((e) => e.active).map((e) => <option key={e.id} value={e.id}>{e.name} · {fmtRON(e.rate)}</option>)}
+                </select>
+              </Field>
+              <Field label="Câte creative"><input name="creatives" type="number" min={1} max={1000} defaultValue={workLeft || 1} required className={inputCls} /></Field>
+              <Field label="Tarif (RON)" hint="Gol = tariful editorului"><input name="rate" inputMode="decimal" className={inputCls} placeholder="implicit" /></Field>
+              <Field label="Data"><input name="work_date" type="date" defaultValue={today} className={inputCls} /></Field>
+              <Field label="Note" className="sm:col-span-3"><input name="notes" className={inputCls} placeholder="opțional" /></Field>
+              <div className="flex items-end"><button className={btnCls}>Adaugă</button></div>
+            </form>
+          )}
+        </Card>
+      ) : null}
 
       {creatives.length > 0 ? (
         <Card title="Editare creative (livrare, QC, feedback)" className="mt-6">

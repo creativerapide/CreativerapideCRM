@@ -56,3 +56,13 @@ export function daysBetween(fromISO: string, toISO: string): number {
   const b = Date.UTC(+toISO.slice(0, 4), +toISO.slice(5, 7) - 1, +toISO.slice(8, 10));
   return Math.round((b - a) / 86400000);
 }
+
+/** Interval [start, end) pentru o lună "YYYY-MM"; implicit luna curentă. */
+export function monthRange(luna?: string | null): { key: string; start: string; end: string; label: string } {
+  const key = luna && /^\d{4}-(0[1-9]|1[0-2])$/.test(luna) ? luna : todayISO().slice(0, 7);
+  const [y, m] = key.split("-").map(Number);
+  const ny = m === 12 ? y + 1 : y;
+  const nm = m === 12 ? 1 : m + 1;
+  const label = new Intl.DateTimeFormat("ro-RO", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, 1)));
+  return { key, start: `${key}-01`, end: `${ny}-${String(nm).padStart(2, "0")}-01`, label };
+}

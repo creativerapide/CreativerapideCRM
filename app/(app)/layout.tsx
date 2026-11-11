@@ -20,7 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           { href: "/", label: "Acasă" },
           { href: "/comenzi", label: "Comenzi" },
           { href: "/clienti", label: "Clienți" },
-          ...(hasFinance(profile) ? [{ href: "/finante", label: "Bani" }] : []),
+          ...(hasFinance(profile) ? [{ href: "/finante", label: "Bani" }, { href: "/editori", label: "Editori" }] : []),
           { href: "/lead-uri", label: "Lead-uri" },
           { href: "/taskuri", label: "Taskuri", more: true },
           { href: "/interactiuni", label: "Interacțiuni", more: true },

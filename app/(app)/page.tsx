@@ -15,7 +15,7 @@ export default async function Dashboard({ searchParams }: { searchParams: SP }) 
   const supabase = await createClient();
   const today = todayISO();
 
-  const [leadsR, tasksR, clientsR, statsR, openOrdersR, monthOrdersR, promisesR, payMonthR, unpaidR] = await Promise.all([
+  const [leadsR, tasksR, clientsR, statsR, openOrdersR, monthOrdersR, promisesR, payMonthR, unpaidR, monthCreativesR] = await Promise.all([
     supabase.from("leads").select("id, store_name, stage, next_step, next_step_at, created_at, owner_id").eq("archived", false).in("stage", ["raspuns_email", "contactat_whatsapp", "test_trimis"]).order("created_at", { ascending: true }),
     supabase.from("tasks").select("id, title, due_date, priority, status, client_id, lead_id, clients(name), leads(store_name)").in("status", ["de_facut", "in_lucru"]).order("due_date", { ascending: true, nullsFirst: false }).limit(200),
     supabase.from("clients").select("id, name, status, risk_level, risk_reason").eq("archived", false),
@@ -25,6 +25,7 @@ export default async function Dashboard({ searchParams }: { searchParams: SP }) 
     supabase.from("interactions").select("id, promise, promise_due, clients(name), leads(store_name), client_id, lead_id").eq("cancelled", false).eq("promise_done", false).not("promise", "is", null).order("promise_due", { ascending: true, nullsFirst: false }).limit(50),
     hasFinance(profile) ? supabase.from("payments").select("amount").gte("paid_on", monthStartISO()).lt("paid_on", nextMonthStartISO()) : Promise.resolve({ data: [] as Row[] }),
     supabase.from("orders").select("total").neq("status", "anulata").neq("financial_status", "incasata"),
+    supabase.from("orders").select("creatives_count, status").neq("status", "anulata").gte("order_date", monthStartISO()).lt("order_date", nextMonthStartISO()),
   ]);
 
   const leads: Row[] = leadsR.data ?? [];
@@ -37,6 +38,9 @@ export default async function Dashboard({ searchParams }: { searchParams: SP }) 
   const revenue = (monthOrdersR.data ?? []).reduce((sum: number, o: Row) => sum + Number(o.total ?? 0), 0);
   const collectedMonth = (payMonthR.data ?? []).reduce((sum: number, o: Row) => sum + Number(o.amount ?? 0), 0);
   const toCollect = (unpaidR.data ?? []).reduce((sum: number, o: Row) => sum + Number(o.total ?? 0), 0);
+  const monthCreatives: Row[] = monthCreativesR.data ?? [];
+  const creativesMonth = monthCreatives.reduce((sum: number, o: Row) => sum + Number(o.creatives_count ?? 0), 0);
+  const creativesDelivered = monthCreatives.filter((o) => o.status === "livrata").reduce((sum: number, o: Row) => sum + Number(o.creatives_count ?? 0), 0);
   const showMoney = hasFinance(profile);
   const pct = Math.min(100, Math.round((revenue / TARGET_LUNAR_RON) * 100));
   const dayOfMonth = Number(today.slice(8, 10));
@@ -72,6 +76,15 @@ export default async function Dashboard({ searchParams }: { searchParams: SP }) 
         <Link href="/comenzi?nou=1#nou" className={`${btnCls} justify-center py-3 text-base`}>+ Comandă nouă</Link>
         {showMoney ? <Link href="/comenzi?neincasate=1" className={`${btnCls} justify-center bg-emerald-600 py-3 text-base hover:bg-emerald-700`}>Încasare nouă</Link> : null}
         <Link href="/lead-uri?nou=1" className={`${btnGhost} justify-center py-3 text-base`}>+ Lead nou</Link>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-indigo-200 bg-indigo-50 p-4 shadow-sm">
+        <div className="text-xs font-medium uppercase tracking-wide text-indigo-700">Creative luna aceasta</div>
+        <div className="mt-1 flex flex-wrap items-end gap-x-4 gap-y-1">
+          <div className="text-4xl font-semibold text-indigo-900">{creativesMonth}</div>
+          <div className="pb-1 text-sm text-indigo-800">{creativesDelivered} livrate · {creativesMonth - creativesDelivered} în lucru</div>
+        </div>
+        <p className="mt-1 text-xs text-indigo-700/80">Din comenzile create luna aceasta, fără cele anulate.</p>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
