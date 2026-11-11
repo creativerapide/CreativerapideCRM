@@ -80,7 +80,7 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
                     <tr key={w.id}>
                       <td className={td}>{fmtDate(w.work_date)}</td>
                       <td className={td}>
-                        <Link className="text-indigo-700 hover:underline" href={`/comenzi/${w.order_id}`}>#{o?.number ?? "?"}</Link>
+                        {w.order_id ? <Link className="text-indigo-700 hover:underline" href={`/comenzi/${w.order_id}`}>#{o?.number ?? "?"}</Link> : <span className="text-slate-500">manual</span>}
                         <div className="text-xs text-slate-500">{o?.client_name}</div>
                       </td>
                       <td className={td}>{w.creatives}</td>

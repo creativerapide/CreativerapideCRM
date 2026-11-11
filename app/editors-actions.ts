@@ -139,3 +139,37 @@ export async function deleteEditorWork(fd: FormData) {
   revalidatePath("/", "layout");
   go(back, "ok", "Lucrare ștearsă.");
 }
+
+/** Lucrări trecute manual (fără comandă): ce a făcut editorul până acum. */
+export async function addManualWork(fd: FormData) {
+  const back = "/editori";
+  const supabase = await guard(back);
+  const v = parse(
+    z.object({
+      editor_id: z.string("Alege editorul.").uuid("Alege editorul."),
+      creatives: z.preprocess((x) => (x == null ? undefined : Number(x)), z.number("Scrie câte creative.").int("Număr întreg.").min(1, "Minim 1 creativă.").max(10000)),
+      rate: optMoney,
+      work_date: dateStr,
+      notes: z.string().max(300).nullable().optional(),
+    }),
+    obj(fd),
+    back,
+  );
+  let rate = v.rate;
+  if (rate === undefined) {
+    const { data: ed } = await supabase.from("editors").select("rate").eq("id", v.editor_id).maybeSingle();
+    if (!ed) go(back, "eroare", "Editorul nu există.");
+    rate = Number(ed.rate);
+  }
+  const { error } = await supabase.from("editor_work").insert({
+    order_id: null,
+    editor_id: v.editor_id,
+    creatives: v.creatives,
+    rate,
+    work_date: v.work_date ?? todayISO(),
+    notes: v.notes ?? "Adăugat manual",
+  });
+  if (error) go(back, "eroare", "Eroare: " + error.message);
+  revalidatePath("/", "layout");
+  go(back, "ok", "Creative adăugate manual.");
+}

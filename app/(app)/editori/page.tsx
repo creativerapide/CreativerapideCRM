@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { hasFinance, requireActive } from "@/lib/session";
 import { Badge, Card, Empty, Field, Flash, PageHeader, Stat, btnCls, btnGhost, btnSmall, inputCls, td, th } from "@/components/ui";
-import { createEditor } from "@/app/editors-actions";
-import { fmtRON, monthRange } from "@/lib/format";
+import { addManualWork, createEditor } from "@/app/editors-actions";
+import { fmtRON, monthRange, todayISO } from "@/lib/format";
 import type { Row, SP } from "@/lib/types";
 
 export default async function EditoriPage({ searchParams }: { searchParams: SP }) {
@@ -91,6 +91,26 @@ export default async function EditoriPage({ searchParams }: { searchParams: SP }
               </tbody>
             </table>
           </div>
+        )}
+      </Card>
+
+      <Card title="Adaugă manual creative făcute (fără comandă)" className="mb-6">
+        {editors.filter((e) => e.active).length === 0 ? (
+          <Empty text="Adaugă mai întâi un editor." />
+        ) : (
+          <form action={addManualWork} className="grid gap-4 sm:grid-cols-4">
+            <Field label="Editor">
+              <select name="editor_id" required defaultValue="" className={inputCls}>
+                <option value="" disabled>Alege editorul</option>
+                {editors.filter((e) => e.active).map((e) => <option key={e.id} value={e.id}>{e.name} · {fmtRON(e.rate)}</option>)}
+              </select>
+            </Field>
+            <Field label="Câte creative"><input name="creatives" type="number" min={1} required className={inputCls} /></Field>
+            <Field label="Tarif (RON)" hint="Gol = tariful editorului"><input name="rate" inputMode="decimal" className={inputCls} placeholder="implicit" /></Field>
+            <Field label="Data" hint="Contează luna în care apare în tabel"><input name="work_date" type="date" defaultValue={todayISO()} className={inputCls} /></Field>
+            <Field label="Note" className="sm:col-span-3"><input name="notes" className={inputCls} placeholder="ex. creative făcute în octombrie" /></Field>
+            <div className="flex items-end"><button className={btnCls}>Adaugă</button></div>
+          </form>
         )}
       </Card>
 
