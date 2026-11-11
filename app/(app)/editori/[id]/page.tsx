@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { hasFinance, requireActive } from "@/lib/session";
 import { Card, Empty, Field, Flash, PageHeader, Stat, btnCls, btnGhost, btnSmall, inputCls, td, th } from "@/components/ui";
-import { deleteEditorWork, updateEditor } from "@/app/editors-actions";
+import { deleteEditorWork, payEditorMonth, setEditorWorkPaid, updateEditor } from "@/app/editors-actions";
 import EditWork from "@/components/EditWork";
 import { fmtDate, fmtRON, monthRange } from "@/lib/format";
 import { one, type Row, type SP } from "@/lib/types";
@@ -20,7 +20,7 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
     supabase.from("editors").select("*").eq("id", id).maybeSingle(),
     supabase
       .from("editor_work")
-      .select("id, order_id, creatives, rate, amount, work_date, notes, orders(number, client_name)")
+      .select("id, order_id, creatives, rate, amount, work_date, notes, paid_at, orders(number, client_name)")
       .eq("editor_id", id)
       .gte("work_date", start)
       .lt("work_date", end)
@@ -32,6 +32,8 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
   const rows: Row[] = workR.data ?? [];
   const totalN = rows.reduce((a, w) => a + Number(w.creatives), 0);
   const totalAmount = rows.reduce((a, w) => a + Number(w.amount), 0);
+  const paidAmount = rows.filter((w) => w.paid_at).reduce((a, w) => a + Number(w.amount), 0);
+  const unpaidAmount = totalAmount - paidAmount;
   const back = `/editori/${id}?luna=${key}`;
 
   return (
@@ -51,11 +53,22 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
       />
       <Flash sp={sp} />
 
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label={`Creative · ${label}`} value={totalN} />
-        <Stat label={`De primit · ${label}`} value={fmtRON(totalAmount)} tone="amber" />
-        <Stat label="Lucrări în lună" value={rows.length} />
+        <Stat label={`Total · ${label}`} value={fmtRON(totalAmount)} />
+        <Stat label="Plătit" value={fmtRON(paidAmount)} />
+        <Stat label="Rămas de plătit" value={fmtRON(unpaidAmount)} tone="amber" />
       </div>
+
+      {unpaidAmount > 0 ? (
+        <form action={payEditorMonth} className="mb-4">
+          <input type="hidden" name="back" value={back} />
+          <input type="hidden" name="editor_id" value={id} />
+          <input type="hidden" name="start" value={start} />
+          <input type="hidden" name="end" value={end} />
+          <button className={btnCls}>Marchează tot ca plătit · {fmtRON(unpaidAmount)}</button>
+        </form>
+      ) : null}
 
       <Card title={`Ce a făcut · ${label}`} className="mb-6">
         {rows.length === 0 ? (
@@ -71,6 +84,7 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
                   <th className={th}>Tarif</th>
                   <th className={th}>Total</th>
                   <th className={th}>Note</th>
+                  <th className={th}>Plată</th>
                   <th className={th}></th>
                 </tr>
               </thead>
@@ -89,6 +103,21 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
                       <td className={`${td} font-medium text-slate-900`}>{fmtRON(w.amount)}</td>
                       <td className={td}>{w.notes ?? ""}</td>
                       <td className={td}>
+                        <form action={setEditorWorkPaid} className="flex items-center gap-1">
+                          <input type="hidden" name="back" value={back} />
+                          <input type="hidden" name="id" value={w.id} />
+                          {w.paid_at ? (
+                            <>
+                              <input type="hidden" name="undo" value="1" />
+                              <span className="text-xs font-medium text-emerald-600">✓ plătit {fmtDate(String(w.paid_at).slice(0, 10))}</span>
+                              <button className="rounded-md border border-slate-300 px-1.5 py-0.5 text-[11px] text-slate-500 hover:bg-slate-50" title="Readu la neplătit">↩</button>
+                            </>
+                          ) : (
+                            <button className="rounded-md bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Plătit</button>
+                          )}
+                        </form>
+                      </td>
+                      <td className={td}>
                         <div className="flex items-center gap-2">
                           <EditWork w={w} back={back} />
                           <form action={deleteEditorWork}>
@@ -106,7 +135,7 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
                   <td className={td}>{totalN}</td>
                   <td className={td}></td>
                   <td className={td}>{fmtRON(totalAmount)}</td>
-                  <td className={td} colSpan={2}></td>
+                  <td className={td} colSpan={3}></td>
                 </tr>
               </tbody>
             </table>

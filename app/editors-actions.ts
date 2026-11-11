@@ -203,3 +203,45 @@ export async function updateEditorWork(fd: FormData) {
   revalidatePath("/", "layout");
   go(back, "ok", "Lucrare modificată.");
 }
+
+/** Marchează o lucrare ca plătită (sau o readuce la neplătită). */
+export async function setEditorWorkPaid(fd: FormData) {
+  const back = String(fd.get("back") ?? "/editori");
+  const id = z.string().uuid().safeParse(fd.get("id"));
+  if (!id.success) go(back, "eroare", "Înregistrare invalidă.");
+  const supabase = await guard(back);
+  const undo = fd.get("undo") === "1";
+  const { error } = await supabase
+    .from("editor_work")
+    .update({ paid_at: undo ? null : new Date().toISOString() })
+    .eq("id", id.data);
+  if (error) go(back, "eroare", "Eroare: " + error.message);
+  revalidatePath("/", "layout");
+  go(back, "ok", undo ? "Lucrare marcată ca neplătită." : "Lucrare marcată ca plătită.");
+}
+
+/** Plătește tot ce e neplătit pentru un editor într-o lună. */
+export async function payEditorMonth(fd: FormData) {
+  const back = String(fd.get("back") ?? "/editori");
+  const v = parse(
+    z.object({
+      editor_id: z.string().uuid("Editor invalid."),
+      start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    }),
+    obj(fd),
+    back,
+  );
+  const supabase = await guard(back);
+  const { data, error } = await supabase
+    .from("editor_work")
+    .update({ paid_at: new Date().toISOString() })
+    .eq("editor_id", v.editor_id)
+    .gte("work_date", v.start)
+    .lt("work_date", v.end)
+    .is("paid_at", null)
+    .select("id");
+  if (error) go(back, "eroare", "Eroare: " + error.message);
+  revalidatePath("/", "layout");
+  go(back, "ok", `Marcate ca plătite: ${data?.length ?? 0} lucrări.`);
+}

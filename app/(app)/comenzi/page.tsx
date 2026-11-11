@@ -43,6 +43,23 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
     write ? supabase.from("clients").select("id, name").eq("archived", false).order("name").limit(1000) : Promise.resolve({ data: [] as Row[] }),
   ]);
   const orders: Row[] = listR.data ?? [];
+  // Editorii (fără cont) care au lucrat pe comenzile din pagină: "Nume ×creative"
+  const edByOrder = new Map<string, string[]>();
+  if (canPay && orders.length > 0) {
+    const { data: ew } = await supabase
+      .from("editor_work")
+      .select("order_id, creatives, editors(name)")
+      .in("order_id", orders.map((o) => o.id));
+    const agg = new Map<string, Map<string, number>>();
+    for (const w of (ew ?? []) as Row[]) {
+      const ed = Array.isArray(w.editors) ? w.editors[0] : w.editors;
+      const name = ed?.name ?? "?";
+      const m = agg.get(w.order_id) ?? new Map<string, number>();
+      m.set(name, (m.get(name) ?? 0) + Number(w.creatives));
+      agg.set(w.order_id, m);
+    }
+    for (const [oid, m] of agg) edByOrder.set(oid, [...m].map(([n, c]) => `${n} ×${c}`));
+  }
   const users: Row[] = usersR.data ?? [];
   const clients: Row[] = clientsR.data ?? [];
   const editorName = (id: string | null) => users.find((u) => u.id === id)?.full_name ?? "—";
@@ -154,7 +171,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
                     <td className={td}>{o.client_name}</td>
                     <td className={td}>{fmtDate(o.order_date)}</td>
                     <td className={td}><Badge value={o.status}>{ORDER_STATUS[o.status]}</Badge></td>
-                    <td className={td}>{editorName(o.editor_id)}</td>
+                    <td className={td}>{edByOrder.get(o.id)?.join(", ") ?? editorName(o.editor_id)}</td>
                     <td className={`${td} ${late ? "font-medium text-red-600" : ""}`}>{fmtDate(o.deadline)}{late ? " · întârziată" : ""}</td>
                     <td className={td}>{o.creatives_count}</td>
                     {money ? <td className={td}>{fmtRON(o.total)}</td> : null}

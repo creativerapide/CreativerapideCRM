@@ -16,19 +16,21 @@ export default async function EditoriPage({ searchParams }: { searchParams: SP }
 
   const [edR, workR] = await Promise.all([
     supabase.from("editors").select("*").order("active", { ascending: false }).order("name"),
-    supabase.from("editor_work").select("editor_id, creatives, amount").gte("work_date", start).lt("work_date", end),
+    supabase.from("editor_work").select("editor_id, creatives, amount, paid_at").gte("work_date", start).lt("work_date", end),
   ]);
   const editors: Row[] = edR.data ?? [];
   const work: Row[] = workR.data ?? [];
-  const sum = new Map<string, { n: number; amount: number }>();
+  const sum = new Map<string, { n: number; amount: number; unpaid: number }>();
   for (const w of work) {
-    const s = sum.get(w.editor_id) ?? { n: 0, amount: 0 };
+    const s = sum.get(w.editor_id) ?? { n: 0, amount: 0, unpaid: 0 };
     s.n += Number(w.creatives);
     s.amount += Number(w.amount);
+    if (!w.paid_at) s.unpaid += Number(w.amount);
     sum.set(w.editor_id, s);
   }
   const totalN = work.reduce((a, w) => a + Number(w.creatives), 0);
   const totalAmount = work.reduce((a, w) => a + Number(w.amount), 0);
+  const totalUnpaid = work.filter((w) => !w.paid_at).reduce((a, w) => a + Number(w.amount), 0);
 
   return (
     <>
@@ -46,7 +48,7 @@ export default async function EditoriPage({ searchParams }: { searchParams: SP }
 
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
         <Stat label={`Creative · ${label}`} value={totalN} hint="trecute pe editori" />
-        <Stat label={`De plătit · ${label}`} value={fmtRON(totalAmount)} tone="amber" hint="suma tuturor editorilor" />
+        <Stat label={`Rămas de plătit · ${label}`} value={fmtRON(totalUnpaid)} tone="amber" hint={`din ${fmtRON(totalAmount)} total`} />
         <Stat label="Editori activi" value={editors.filter((e) => e.active).length} />
       </div>
 
@@ -61,7 +63,8 @@ export default async function EditoriPage({ searchParams }: { searchParams: SP }
                   <th className={th}>Editor</th>
                   <th className={th}>Tarif / creativă</th>
                   <th className={th}>Creative</th>
-                  <th className={th}>De primit</th>
+                  <th className={th}>Total</th>
+                  <th className={th}>Rămas de plătit</th>
                   <th className={th}></th>
                 </tr>
               </thead>
@@ -76,7 +79,8 @@ export default async function EditoriPage({ searchParams }: { searchParams: SP }
                       </td>
                       <td className={td}>{fmtRON(e.rate)}</td>
                       <td className={td}>{s?.n ?? 0}</td>
-                      <td className={`${td} font-semibold text-slate-900`}>{fmtRON(s?.amount ?? 0)}</td>
+                      <td className={td}>{fmtRON(s?.amount ?? 0)}</td>
+                      <td className={`${td} font-semibold ${(s?.unpaid ?? 0) > 0 ? "text-amber-700" : "text-emerald-600"}`}>{(s?.unpaid ?? 0) > 0 ? fmtRON(s?.unpaid ?? 0) : "✓ la zi"}</td>
                       <td className={td}><Link className={btnSmall} href={`/editori/${e.id}?luna=${key}`}>Detalii</Link></td>
                     </tr>
                   );
@@ -86,6 +90,7 @@ export default async function EditoriPage({ searchParams }: { searchParams: SP }
                   <td className={td}></td>
                   <td className={td}>{totalN}</td>
                   <td className={td}>{fmtRON(totalAmount)}</td>
+                  <td className={td}>{fmtRON(totalUnpaid)}</td>
                   <td className={td}></td>
                 </tr>
               </tbody>
