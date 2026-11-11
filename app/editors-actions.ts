@@ -53,6 +53,15 @@ const optMoney = z.preprocess(
 );
 const dateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Dată invalidă.").nullable().optional();
 
+/** Tarif din: tarif introdus, sau sumă totală / creative, sau tariful implicit al editorului. */
+async function resolveRate(supabase: Awaited<ReturnType<typeof createClient>>, back: string, editorId: string, creatives: number, rate?: number, total?: number) {
+  if (total !== undefined) return Math.round((total / creatives) * 10000) / 10000;
+  if (rate !== undefined) return rate;
+  const { data: ed } = await supabase.from("editors").select("rate").eq("id", editorId).maybeSingle();
+  if (!ed) go(back, "eroare", "Editorul nu există.");
+  return Number(ed.rate);
+}
+
 export async function createEditor(fd: FormData) {
   const back = "/editori";
   const supabase = await guard(back);
@@ -104,18 +113,14 @@ export async function addEditorWork(fd: FormData) {
       editor_id: z.string("Alege editorul.").uuid("Alege editorul."),
       creatives: z.preprocess((x) => (x == null ? undefined : Number(x)), z.number("Scrie câte creative.").int("Număr întreg.").min(1, "Minim 1 creativă.").max(1000)),
       rate: optMoney,
+      total: optMoney,
       work_date: dateStr,
       notes: z.string().max(300).nullable().optional(),
     }),
     obj(fd),
     back,
   );
-  let rate = v.rate;
-  if (rate === undefined) {
-    const { data: ed } = await supabase.from("editors").select("rate").eq("id", v.editor_id).maybeSingle();
-    if (!ed) go(back, "eroare", "Editorul nu există.");
-    rate = Number(ed.rate);
-  }
+  const rate = await resolveRate(supabase, back, v.editor_id, v.creatives, v.rate, v.total);
   const { error } = await supabase.from("editor_work").insert({
     order_id: v.order_id,
     editor_id: v.editor_id,
@@ -149,18 +154,14 @@ export async function addManualWork(fd: FormData) {
       editor_id: z.string("Alege editorul.").uuid("Alege editorul."),
       creatives: z.preprocess((x) => (x == null ? undefined : Number(x)), z.number("Scrie câte creative.").int("Număr întreg.").min(1, "Minim 1 creativă.").max(10000)),
       rate: optMoney,
+      total: optMoney,
       work_date: dateStr,
       notes: z.string().max(300).nullable().optional(),
     }),
     obj(fd),
     back,
   );
-  let rate = v.rate;
-  if (rate === undefined) {
-    const { data: ed } = await supabase.from("editors").select("rate").eq("id", v.editor_id).maybeSingle();
-    if (!ed) go(back, "eroare", "Editorul nu există.");
-    rate = Number(ed.rate);
-  }
+  const rate = await resolveRate(supabase, back, v.editor_id, v.creatives, v.rate, v.total);
   const { error } = await supabase.from("editor_work").insert({
     order_id: null,
     editor_id: v.editor_id,
@@ -172,4 +173,33 @@ export async function addManualWork(fd: FormData) {
   if (error) go(back, "eroare", "Eroare: " + error.message);
   revalidatePath("/", "layout");
   go(back, "ok", "Creative adăugate manual.");
+}
+
+/** Modifică o lucrare deja trecută (greșeli). Sumă totală completată = tariful se calculează din ea. */
+export async function updateEditorWork(fd: FormData) {
+  const back = String(fd.get("back") ?? "/editori");
+  const id = z.string().uuid().safeParse(fd.get("id"));
+  if (!id.success) go(back, "eroare", "Înregistrare invalidă.");
+  const supabase = await guard(back);
+  const v = parse(
+    z.object({
+      creatives: z.preprocess((x) => (x == null ? undefined : Number(x)), z.number("Scrie câte creative.").int("Număr întreg.").min(1, "Minim 1 creativă.").max(10000)),
+      rate: optMoney,
+      total: optMoney,
+      work_date: dateStr,
+      notes: z.string().max(300).nullable().optional(),
+    }),
+    obj(fd),
+    back,
+  );
+  const { data: cur } = await supabase.from("editor_work").select("editor_id, rate").eq("id", id.data).maybeSingle();
+  if (!cur) go(back, "eroare", "Lucrarea nu mai există.");
+  const rate = v.total !== undefined ? Math.round((v.total / v.creatives) * 10000) / 10000 : (v.rate ?? Number(cur.rate));
+  const { error } = await supabase
+    .from("editor_work")
+    .update({ creatives: v.creatives, rate, work_date: v.work_date ?? todayISO(), notes: v.notes ?? null })
+    .eq("id", id.data);
+  if (error) go(back, "eroare", "Eroare: " + error.message);
+  revalidatePath("/", "layout");
+  go(back, "ok", "Lucrare modificată.");
 }

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { hasFinance, requireActive } from "@/lib/session";
 import { Card, Empty, Field, Flash, PageHeader, Stat, btnCls, btnGhost, btnSmall, inputCls, td, th } from "@/components/ui";
 import { deleteEditorWork, updateEditor } from "@/app/editors-actions";
+import EditWork from "@/components/EditWork";
 import { fmtDate, fmtRON, monthRange } from "@/lib/format";
 import { one, type Row, type SP } from "@/lib/types";
 
@@ -88,11 +89,14 @@ export default async function EditorPage({ params, searchParams }: { params: Pro
                       <td className={`${td} font-medium text-slate-900`}>{fmtRON(w.amount)}</td>
                       <td className={td}>{w.notes ?? ""}</td>
                       <td className={td}>
-                        <form action={deleteEditorWork}>
-                          <input type="hidden" name="back" value={back} />
-                          <input type="hidden" name="id" value={w.id} />
-                          <button className={btnSmall}>Șterge</button>
-                        </form>
+                        <div className="flex items-center gap-2">
+                          <EditWork w={w} back={back} />
+                          <form action={deleteEditorWork}>
+                            <input type="hidden" name="back" value={back} />
+                            <input type="hidden" name="id" value={w.id} />
+                            <button className={btnSmall}>Șterge</button>
+                          </form>
+                        </div>
                       </td>
                     </tr>
                   );

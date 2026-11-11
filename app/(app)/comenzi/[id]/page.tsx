@@ -7,6 +7,7 @@ import { deleteOrder } from "@/app/delete-order";
 import { markOrderSent } from "@/app/order-quick";
 import { markOrderPaid } from "@/app/stage2-actions";
 import { addEditorWork, deleteEditorWork } from "@/app/editors-actions";
+import EditWork from "@/components/EditWork";
 import { addCreatives, bulkCreativeStatus, updateCreative, updateOrder, updateOrderEditor } from "@/app/actions";
 import { fmtDate, fmtDateTime, fmtRON, todayISO } from "@/lib/format";
 import { CREATIVE_STATUS, FINANCIAL, ORDER_STATUS, PACKAGES } from "@/lib/constants";
@@ -244,11 +245,14 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
                       <td className={`${td} font-medium text-slate-900`}>{fmtRON(w.amount)}</td>
                       <td className={td}>{fmtDate(w.work_date)}</td>
                       <td className={td}>
-                        <form action={deleteEditorWork}>
-                          <input type="hidden" name="back" value={back} />
-                          <input type="hidden" name="id" value={w.id} />
-                          <button className={btnSmall}>Șterge</button>
-                        </form>
+                        <div className="flex items-center gap-2">
+                          <EditWork w={w} back={back} />
+                          <form action={deleteEditorWork}>
+                            <input type="hidden" name="back" value={back} />
+                            <input type="hidden" name="id" value={w.id} />
+                            <button className={btnSmall}>Șterge</button>
+                          </form>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -270,8 +274,9 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
               </Field>
               <Field label="Câte creative"><input name="creatives" type="number" min={1} max={1000} defaultValue={workLeft || 1} required className={inputCls} /></Field>
               <Field label="Tarif (RON)" hint="Gol = tariful editorului"><input name="rate" inputMode="decimal" className={inputCls} placeholder="implicit" /></Field>
+              <Field label="SAU suma totală (RON)" hint="Cât primește pe comandă"><input name="total" inputMode="decimal" className={inputCls} placeholder="ex. 60" /></Field>
               <Field label="Data"><input name="work_date" type="date" defaultValue={today} className={inputCls} /></Field>
-              <Field label="Note" className="sm:col-span-3"><input name="notes" className={inputCls} placeholder="opțional" /></Field>
+              <Field label="Note" className="sm:col-span-2"><input name="notes" className={inputCls} placeholder="opțional" /></Field>
               <div className="flex items-end"><button className={btnCls}>Adaugă</button></div>
             </form>
           )}

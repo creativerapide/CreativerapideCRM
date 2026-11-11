@@ -107,8 +107,9 @@ export default async function EditoriPage({ searchParams }: { searchParams: SP }
             </Field>
             <Field label="Câte creative"><input name="creatives" type="number" min={1} required className={inputCls} /></Field>
             <Field label="Tarif (RON)" hint="Gol = tariful editorului"><input name="rate" inputMode="decimal" className={inputCls} placeholder="implicit" /></Field>
+            <Field label="SAU suma totală (RON)" hint="Dacă o completezi, tariful se calculează din ea"><input name="total" inputMode="decimal" className={inputCls} placeholder="ex. 120" /></Field>
             <Field label="Data" hint="Contează luna în care apare în tabel"><input name="work_date" type="date" defaultValue={todayISO()} className={inputCls} /></Field>
-            <Field label="Note" className="sm:col-span-3"><input name="notes" className={inputCls} placeholder="ex. creative făcute în octombrie" /></Field>
+            <Field label="Note" className="sm:col-span-2"><input name="notes" className={inputCls} placeholder="ex. creative făcute în octombrie" /></Field>
             <div className="flex items-end"><button className={btnCls}>Adaugă</button></div>
           </form>
         )}
