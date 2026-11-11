@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { canRead, hasFinance, isAdmin, isStaff, requireActive } from "@/lib/session";
-import { Badge, Empty, Field, Flash, PageHeader, Pagination, Select, btnCls, btnGhost, inputCls, td, th } from "@/components/ui";
+import { Badge, Empty, Field, Flash, PageHeader, Pagination, Select, btnCls, btnGhost, btnSmall, inputCls, td, th } from "@/components/ui";
 import { createOrder } from "@/app/actions";
 import { deleteOrder } from "@/app/delete-order";
 import { markOrderPaid } from "@/app/stage2-actions";
@@ -129,6 +129,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
           <table className="min-w-full divide-y divide-slate-100">
             <thead className="bg-slate-50">
               <tr>
+                <th className={th}></th>
                 <th className={th}>Nr.</th>
                 <th className={th}>Client</th>
                 <th className={th}>Data</th>
@@ -148,6 +149,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
                 const late = o.deadline && o.deadline < today && !["livrata", "anulata"].includes(o.status);
                 return (
                   <tr key={o.id} className="hover:bg-slate-50">
+                    <td className={td}><Link className={btnSmall} href={`/comenzi/${o.id}`}>Editează</Link></td>
                     <td className={td}><Link className="font-medium text-indigo-700 hover:underline" href={`/comenzi/${o.id}`}>#{o.number}</Link></td>
                     <td className={td}>{o.client_name}</td>
                     <td className={td}>{fmtDate(o.order_date)}</td>
