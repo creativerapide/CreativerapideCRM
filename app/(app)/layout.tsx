@@ -38,7 +38,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         roleLabel={ROLES[profile.role]}
         showSearch={profile.role !== "editor"}
       />
-      <main className="lg:pl-60">
+      <main className="lg:pl-[16.5rem]">
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:py-8">{children}</div>
       </main>
     </div>

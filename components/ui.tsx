@@ -42,7 +42,7 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   return (
     <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900 sm:text-2xl">{title}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">{title}</h1>
         {subtitle ? <p className="mt-1 text-sm text-slate-500">{subtitle}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
@@ -54,7 +54,7 @@ export function Card({ title, action, children, className = "" }: { title?: stri
   return (
     <section className={`rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}>
       {title ? (
-        <header className="flex items-center justify-between rounded-t-xl border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <header className="flex items-center justify-between rounded-t-xl border-b border-slate-100 bg-slate-50 px-4 py-3">
           <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
           {action}
         </header>
@@ -66,12 +66,13 @@ export function Card({ title, action, children, className = "" }: { title?: stri
 
 export function Stat({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: string; tone?: "red" | "green" | "amber" }) {
   const color = tone === "red" ? "text-red-600" : tone === "green" ? "text-emerald-600" : tone === "amber" ? "text-amber-600" : "text-slate-900";
-  const bar = tone === "red" ? "border-t-red-500" : tone === "green" ? "border-t-emerald-500" : tone === "amber" ? "border-t-amber-500" : "border-t-slate-300";
+  const glow = tone === "red" ? "from-red-400/70" : tone === "green" ? "from-emerald-400/70" : tone === "amber" ? "from-amber-400/70" : "from-indigo-300/60";
   return (
-    <div className={`rounded-xl border border-slate-200 border-t-4 bg-white p-4 shadow-sm ${bar}`}>
-      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
-      <div className={`mt-1 text-2xl font-semibold tabular-nums ${color}`}>{value}</div>
-      {hint ? <div className="mt-1 text-xs text-slate-500">{hint}</div> : null}
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <span className={`pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-gradient-to-br ${glow} to-transparent blur-2xl`} />
+      <div className="relative text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
+      <div className={`relative mt-1 text-2xl font-semibold tabular-nums ${color}`}>{value}</div>
+      {hint ? <div className="relative mt-1 text-xs text-slate-500">{hint}</div> : null}
     </div>
   );
 }

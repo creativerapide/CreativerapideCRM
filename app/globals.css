@@ -1,23 +1,163 @@
 @import "tailwindcss";
 
+/* ───────────── Tema "liquid glass" (stil Apple / iOS) ───────────── */
+
 :root {
-  --background: #f8fafc;
   --foreground: #0f172a;
+  --glass: rgba(255, 255, 255, 0.58);
+  --glass-soft: rgba(255, 255, 255, 0.36);
+  --glass-strong: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-line: rgba(100, 116, 139, 0.16);
+  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 -1px 0 rgba(255, 255, 255, 0.25) inset, 0 10px 34px rgba(49, 46, 129, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05);
 }
 
 @theme inline {
-  --color-background: var(--background);
   --color-foreground: var(--foreground);
 }
 
 html {
   color-scheme: light;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.006em;
+  background-color: #eaeefc;
+  background-image:
+    radial-gradient(52rem 38rem at 6% -6%, rgba(129, 140, 248, 0.62), transparent 62%),
+    radial-gradient(46rem 34rem at 102% 2%, rgba(244, 114, 182, 0.42), transparent 62%),
+    radial-gradient(54rem 44rem at 92% 108%, rgba(56, 189, 248, 0.5), transparent 62%),
+    radial-gradient(44rem 34rem at -4% 104%, rgba(251, 191, 36, 0.34), transparent 62%),
+    radial-gradient(30rem 24rem at 55% 45%, rgba(167, 139, 250, 0.22), transparent 70%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.25);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+
+main {
+  animation: glass-in 0.35s ease-out both;
+}
+@keyframes glass-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── colțuri mai rotunjite ── */
+.rounded-md { border-radius: 0.7rem; }
+.rounded-lg { border-radius: 0.95rem; }
+.rounded-xl { border-radius: 1.4rem; }
+
+/* ── suprafețe de sticlă: tot ce era alb devine sticlă translucidă ── */
+.bg-white {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  backdrop-filter: blur(26px) saturate(180%);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+/* sticlă în sticlă: mai discret */
+.bg-white .bg-white {
+  background: var(--glass-soft);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+}
+/* câmpuri, butoane și linkuri albe */
+input.bg-white, select.bg-white, textarea.bg-white {
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-color: rgba(148, 163, 184, 0.45);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06) inset;
+}
+button.bg-white, a.bg-white, span.bg-white {
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 2px 8px rgba(49, 46, 129, 0.08);
+}
+input, select, textarea {
+  background-color: var(--glass-strong);
+  border-radius: 0.95rem;
+}
+input:focus, select:focus, textarea:focus {
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+}
+
+.bg-slate-50 { background: rgba(255, 255, 255, 0.34); }
+.bg-slate-100 { background: rgba(255, 255, 255, 0.42); }
+.hover\:bg-slate-50:hover { background: rgba(255, 255, 255, 0.6); }
+.hover\:bg-slate-100:hover { background: rgba(255, 255, 255, 0.55); }
+
+/* ── linii și borduri fine ── */
+.border-slate-200 { border-color: var(--glass-border); }
+.border-slate-100 { border-color: var(--glass-line); }
+.border-slate-300 { border-color: rgba(148, 163, 184, 0.45); }
+.divide-slate-100 > :not(:last-child) { border-color: var(--glass-line); }
+.border-dashed { border-color: rgba(100, 116, 139, 0.35); }
+
+/* ── text, mai lizibil pe sticlă ── */
+.text-slate-500 { color: #475569; }
+.text-slate-400 { color: #64748b; }
+
+/* ── butoane colorate "gel" ── */
+.bg-indigo-600 {
+  background-image: linear-gradient(180deg, #8b93ff 0%, #5b5bf0 55%, #4a46dc 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset, 0 6px 16px rgba(79, 70, 229, 0.35);
+}
+.hover\:bg-indigo-700:hover { background-image: linear-gradient(180deg, #7d85ff 0%, #4f4ee6 55%, #3f3bd0 100%); }
+.bg-emerald-600 {
+  background-image: linear-gradient(180deg, #34d399 0%, #10b981 55%, #059669 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset, 0 6px 16px rgba(5, 150, 105, 0.3);
+}
+.hover\:bg-emerald-700:hover { background-image: linear-gradient(180deg, #2bc48b 0%, #0ea371 55%, #047857 100%); }
+.bg-red-600 {
+  background-image: linear-gradient(180deg, #fb7185 0%, #ef4444 55%, #dc2626 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 6px 16px rgba(220, 38, 38, 0.28);
+}
+.hover\:bg-red-700:hover { background-image: linear-gradient(180deg, #f9566d 0%, #e23b3b 55%, #b91c1c 100%); }
+button, a { transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease, color 0.18s ease; }
+button:active { transform: scale(0.97); }
+
+/* ── etichete (badge) și alerte, translucide ── */
+.bg-emerald-50 { background: rgba(16, 185, 129, 0.15); }
+.bg-sky-50 { background: rgba(14, 165, 233, 0.15); }
+.bg-amber-50 { background: rgba(245, 158, 11, 0.17); }
+.bg-red-50 { background: rgba(239, 68, 68, 0.14); }
+.bg-indigo-50 { background: rgba(99, 102, 241, 0.15); }
+.hover\:bg-red-50:hover { background: rgba(239, 68, 68, 0.2); }
+.border-red-200 { border-color: rgba(239, 68, 68, 0.3); }
+.border-emerald-200 { border-color: rgba(16, 185, 129, 0.3); }
+
+/* bara de progres */
+.bg-indigo-600.rounded-full, .rounded-full.bg-indigo-600 { box-shadow: none; }
+
+/* meniul activ din bara laterală */
+.nav-active {
+  background: rgba(255, 255, 255, 0.85);
+  color: #4338ca;
+  box-shadow: 0 1px 0 #fff inset, 0 4px 14px rgba(79, 70, 229, 0.16);
+}
+
+/* tabele */
+table { border-collapse: separate; border-spacing: 0; }
+thead th { background: rgba(255, 255, 255, 0.4); }
+tbody tr:hover td { background: rgba(255, 255, 255, 0.42); }
+
+@media (prefers-reduced-motion: reduce) {
+  main { animation: none; }
+  button:active { transform: none; }
 }
 
 @media print {
@@ -27,8 +167,15 @@ body {
   }
   main {
     padding-left: 0 !important;
+    animation: none;
   }
   body {
+    background: #fff !important;
+  }
+  .bg-white {
     background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
   }
 }

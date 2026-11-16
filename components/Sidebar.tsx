@@ -28,8 +28,8 @@ export default function Sidebar({
         key={it.href}
         href={it.href}
         onClick={() => setOpen(false)}
-        className={`block rounded-lg px-3 py-2 text-sm font-medium ${
-          active ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-100"
+        className={`block rounded-xl px-3.5 py-2 text-sm font-medium ${
+          active ? "nav-active" : "text-slate-600 hover:bg-slate-100"
         }`}
       >
         {it.label}
@@ -53,7 +53,7 @@ export default function Sidebar({
   return (
     <>
       {/* bară de sus pe mobil */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+      <div className="sticky top-2 z-30 mx-2 mt-2 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 lg:hidden">
         <span className="text-sm font-semibold text-slate-900">Creative Rapide · CRM</span>
         <button
           onClick={() => setOpen((o) => !o)}
@@ -64,7 +64,7 @@ export default function Sidebar({
         </button>
       </div>
       {open ? (
-        <div className="fixed inset-x-0 top-[53px] z-20 max-h-[calc(100vh-53px)] overflow-y-auto border-b border-slate-200 bg-white shadow-lg lg:hidden">
+        <div className="fixed inset-x-2 top-[68px] z-20 max-h-[calc(100vh-80px)] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-lg lg:hidden">
           {showSearch ? <SearchBox /> : null}
           {nav}
           {footer}
@@ -72,9 +72,9 @@ export default function Sidebar({
       ) : null}
 
       {/* bară laterală pe desktop */}
-      <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-slate-200 bg-white lg:flex">
+      <aside className="fixed inset-y-3 left-3 hidden w-60 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white lg:flex">
         <div className="px-5 py-5">
-          <div className="text-base font-semibold text-slate-900">Creative Rapide</div>
+          <div className="text-lg font-semibold tracking-tight text-slate-900">Creative Rapide</div>
           <div className="text-xs text-slate-500">CRM</div>
         </div>
         {showSearch ? <SearchBox /> : null}
