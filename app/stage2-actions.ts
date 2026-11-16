@@ -122,7 +122,7 @@ export async function markOrderPaid(fd: FormData) {
   const v = parse(
     z.object({
       order_id: z.string("Alege comanda.").uuid("Alege comanda."),
-      method: oneOf(["transfer", "card"], "Încasarea se face doar în contul firmei sau pe card.").optional(),
+      method: z.string().nullable().optional(),
       paid_on: date,
     }),
     obj(fd),
@@ -172,7 +172,7 @@ export async function markOrderPaid(fd: FormData) {
   if (toPay > 0) {
     const { error } = await supabase
       .from("payments")
-      .insert({ invoice_id: invoiceId, amount: toPay, paid_on: v.paid_on ?? todayISO(), method: v.method ?? "transfer" });
+      .insert({ invoice_id: invoiceId, amount: toPay, paid_on: v.paid_on ?? todayISO(), method: v.method === "card" ? "card" : "transfer" });
     if (error) go(back, "eroare", dbErr(error));
   }
   revalidatePath("/", "layout");

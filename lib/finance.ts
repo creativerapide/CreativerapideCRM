@@ -15,20 +15,16 @@ export const COST_CATEGORY: Opt = {
   alte: "Altele",
 };
 
-/** Etichete pentru afișare (include metodele vechi, ca încasările existente să rămână lizibile). */
-export const PAY_METHOD: Opt = {
+/**
+ * Metode de încasare permise: doar contul firmei sau cardul (acestea apar în liste/selecturi).
+ * Metodele vechi rămân doar pentru afișarea încasărilor existente (prin prototip, deci nu apar în selecturi).
+ */
+export const PAY_METHOD: Opt = Object.assign(Object.create({ numerar: "Numerar", ramburs: "Ramburs", altul: "Altul" }) as Opt, {
   transfer: "Cont firmă",
   card: "Card",
-  numerar: "Numerar",
-  ramburs: "Ramburs",
-  altul: "Altul",
-};
+});
 
-/** Singurele metode permise la încasări noi. */
-export const PAY_METHOD_INPUT: Opt = {
-  transfer: "Cont firmă",
-  card: "Card",
-};
+export const PAY_METHOD_INPUT: Opt = PAY_METHOD;
 
 export const EXPENSE_CATEGORY: Opt = {
   reclame: "Reclame / ads",
