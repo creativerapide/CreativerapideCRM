@@ -52,9 +52,9 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 
 export function Card({ title, action, children, className = "" }: { title?: string; action?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}>
+    <section className={`overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}>
       {title ? (
-        <header className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+        <header className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
           <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
           {action}
         </header>
@@ -66,10 +66,11 @@ export function Card({ title, action, children, className = "" }: { title?: stri
 
 export function Stat({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: string; tone?: "red" | "green" | "amber" }) {
   const color = tone === "red" ? "text-red-600" : tone === "green" ? "text-emerald-600" : tone === "amber" ? "text-amber-600" : "text-slate-900";
+  const bar = tone === "red" ? "border-t-red-500" : tone === "green" ? "border-t-emerald-500" : tone === "amber" ? "border-t-amber-500" : "border-t-slate-300";
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className={`rounded-xl border border-slate-200 border-t-4 bg-white p-4 shadow-sm ${bar}`}>
       <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
-      <div className={`mt-1 text-2xl font-semibold ${color}`}>{value}</div>
+      <div className={`mt-1 text-2xl font-semibold tabular-nums ${color}`}>{value}</div>
       {hint ? <div className="mt-1 text-xs text-slate-500">{hint}</div> : null}
     </div>
   );
