@@ -6,7 +6,7 @@ import { createOrder } from "@/app/actions";
 import { deleteOrder } from "@/app/delete-order";
 import { markOrderPaid } from "@/app/stage2-actions";
 import { markOrderSent } from "@/app/order-quick";
-import { PAY_METHOD } from "@/lib/finance";
+import { PAY_METHOD_INPUT } from "@/lib/finance";
 import { fmtDate, fmtRON, todayISO } from "@/lib/format";
 import { FINANCIAL, ORDER_STATUS, PACKAGES, PAGE_SIZE } from "@/lib/constants";
 import type { Row, SP } from "@/lib/types";
@@ -205,8 +205,8 @@ export default async function OrdersPage({ searchParams }: { searchParams: SP })
                           <form action={markOrderPaid} className="flex items-center gap-1">
                             <input type="hidden" name="back" value={base} />
                             <input type="hidden" name="order_id" value={o.id} />
-                            <select name="method" defaultValue="ramburs" className="rounded-md border border-slate-300 bg-white px-1.5 py-1 text-xs">
-                              {Object.entries(PAY_METHOD).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
+                            <select name="method" defaultValue="transfer" className="rounded-md border border-slate-300 bg-white px-1.5 py-1 text-xs">
+                              {Object.entries(PAY_METHOD_INPUT).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
                             </select>
                             <button className="rounded-md bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-700">Încasat</button>
                           </form>

@@ -6,7 +6,7 @@ import { Badge, Card, Empty, Field, Flash, PageHeader, Select, Stat, btnCls, btn
 import FinanceChart, { type ChartPoint } from "@/components/FinanceChart";
 import { addCost, addPayment, cancelInvoice, createInvoice, deleteCost } from "@/app/stage2-actions";
 import { fmtDate, fmtRON, todayISO } from "@/lib/format";
-import { COST_CATEGORY, INVOICE_STATUS, PAY_METHOD, monthLabel, monthParam, monthRange, monthShort, shiftMonth, sum } from "@/lib/finance";
+import { COST_CATEGORY, INVOICE_STATUS, PAY_METHOD, PAY_METHOD_INPUT, monthLabel, monthParam, monthRange, monthShort, shiftMonth, sum } from "@/lib/finance";
 import { one, type Row, type SP } from "@/lib/types";
 
 export default async function FinancePage({ searchParams }: { searchParams: SP }) {
@@ -132,7 +132,7 @@ export default async function FinancePage({ searchParams }: { searchParams: SP }
               <Field label="Sumă încasată (RON) *"><input name="amount" required inputMode="decimal" className={inputCls} /></Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Data încasării"><input name="paid_on" type="date" defaultValue={today} className={inputCls} /></Field>
-                <Field label="Metodă"><Select name="method" options={PAY_METHOD} defaultValue="transfer" /></Field>
+                <Field label="Metodă"><Select name="method" options={PAY_METHOD_INPUT} defaultValue="transfer" /></Field>
               </div>
               <div><button className={btnCls}>Înregistrează încasarea</button></div>
             </form>

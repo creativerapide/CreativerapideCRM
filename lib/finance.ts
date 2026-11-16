@@ -15,12 +15,28 @@ export const COST_CATEGORY: Opt = {
   alte: "Altele",
 };
 
+/** Etichete pentru afișare (include metodele vechi, ca încasările existente să rămână lizibile). */
 export const PAY_METHOD: Opt = {
-  transfer: "Transfer bancar",
+  transfer: "Cont firmă",
   card: "Card",
   numerar: "Numerar",
   ramburs: "Ramburs",
   altul: "Altul",
+};
+
+/** Singurele metode permise la încasări noi. */
+export const PAY_METHOD_INPUT: Opt = {
+  transfer: "Cont firmă",
+  card: "Card",
+};
+
+export const EXPENSE_CATEGORY: Opt = {
+  reclame: "Reclame / ads",
+  software: "Software și abonamente",
+  taxe: "Taxe, contabilitate",
+  colaboratori: "Colaboratori",
+  echipament: "Echipament",
+  altele: "Altele",
 };
 
 /** Normalizează parametrul ?luna=YYYY-MM; implicit luna curentă. */

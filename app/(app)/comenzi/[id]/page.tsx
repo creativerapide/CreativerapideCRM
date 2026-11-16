@@ -75,7 +75,10 @@ export default async function OrderDetail({ params, searchParams }: { params: Pr
               <form action={markOrderPaid} className="flex items-center gap-1">
                 <input type="hidden" name="back" value={back} />
                 <input type="hidden" name="order_id" value={id} />
-                <input type="hidden" name="method" value="ramburs" />
+                <select name="method" defaultValue="transfer" className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm">
+                  <option value="transfer">Cont firmă</option>
+                  <option value="card">Card</option>
+                </select>
                 <button className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Încasat</button>
               </form>
             ) : null}
