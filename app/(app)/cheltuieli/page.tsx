@@ -38,7 +38,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams: SP 
   const editorsUnpaid = editorsTotal - editorsPaid;
   const expensesTotal = sum(expAllR.data, "amount");
   const withdrawnTotal = sum(wdAllR.data, "amount");
-  const available = collected - editorsTotal - expensesTotal - withdrawnTotal;
+  const available = grandTotal - editorsTotal - expensesTotal - withdrawnTotal;
 
   const expMonth: Row[] = expMonthR.data ?? [];
   const wdMonth: Row[] = wdMonthR.data ?? [];
@@ -69,7 +69,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams: SP 
           <Stat label="Editori" value={fmtRON(editorsTotal)} tone="amber" hint={`plătiți ${fmtRON(editorsPaid)} · de plătit ${fmtRON(editorsUnpaid)}`} />
           <Stat label="Cheltuieli" value={fmtRON(expensesTotal)} tone="amber" hint="din firmă, total" />
           <Stat label="Extrageri" value={fmtRON(withdrawnTotal)} tone="amber" hint="bani scoși, total" />
-          <Stat label="Disponibil acum" value={fmtRON(available)} tone={available < 0 ? "red" : "green"} hint="încasat − editori − cheltuieli − extrageri" />
+          <Stat label="Disponibil acum" value={fmtRON(available)} tone={available < 0 ? "red" : "green"} hint="încasat + de încasat − editori − cheltuieli − extrageri" />
         </div>
       </div>
 
