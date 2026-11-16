@@ -52,9 +52,9 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 
 export function Card({ title, action, children, className = "" }: { title?: string; action?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={`overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}>
+    <section className={`rounded-xl border border-slate-200 bg-white shadow-sm ${className}`}>
       {title ? (
-        <header className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <header className="flex items-center justify-between rounded-t-xl border-b border-slate-200 bg-slate-50 px-4 py-3">
           <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
           {action}
         </header>
