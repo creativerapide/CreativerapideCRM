@@ -4,11 +4,12 @@
 
 :root {
   --foreground: #1d1d1f;
-  --page: #f5f5f7;
-  --glass: rgba(255, 255, 255, 0.78);
-  --glass-border: rgba(0, 0, 0, 0.07);
+  --page: #f1f2f5;
+  /* Liquid Glass (stormaref/LiquidGlassSkill), tema light: tint incolor + margine lustruita */
+  --glass: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.38));
+  --glass-border: rgba(30, 33, 45, 0.12);
   --glass-line: rgba(0, 0, 0, 0.07);
-  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --glass-shadow: 0 10px 30px rgba(30, 33, 45, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(255, 255, 255, 0.5);
   --apple-blue: #0071e3;
   --apple-blue-hover: #0077ed;
 }
@@ -26,7 +27,14 @@ body {
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   letter-spacing: -0.011em;
-  background: var(--page);
+  background-color: var(--page);
+  /* backdrop pentru sticla: doar umbre gri foarte fine, fara culoare */
+  background-image:
+    radial-gradient(44rem 34rem at 40% 36%, rgba(255, 255, 255, 0.95), transparent 62%),
+    radial-gradient(40rem 30rem at 70% 60%, rgba(120, 128, 150, 0.1), transparent 62%),
+    radial-gradient(50rem 36rem at 8% 100%, rgba(120, 128, 150, 0.12), transparent 62%),
+    radial-gradient(46rem 34rem at 100% 0%, rgba(120, 128, 150, 0.09), transparent 62%);
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
@@ -55,8 +63,8 @@ main {
 /* ── suprafețe: sticlă albă fină ── */
 .bg-white {
   background: var(--glass);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(6px) saturate(125%);
+  backdrop-filter: blur(6px) saturate(125%);
   border-color: var(--glass-border);
   box-shadow: var(--glass-shadow);
 }
