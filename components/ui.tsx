@@ -66,10 +66,8 @@ export function Card({ title, action, children, className = "" }: { title?: stri
 
 export function Stat({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: string; tone?: "red" | "green" | "amber" }) {
   const color = tone === "red" ? "text-red-600" : tone === "green" ? "text-emerald-600" : tone === "amber" ? "text-amber-600" : "text-slate-900";
-  const glow = tone === "red" ? "from-red-400/70" : tone === "green" ? "from-emerald-400/70" : tone === "amber" ? "from-amber-400/70" : "from-indigo-300/60";
   return (
     <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <span className={`pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-gradient-to-br ${glow} to-transparent blur-2xl`} />
       <div className="relative text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
       <div className={`relative mt-1 text-2xl font-semibold tabular-nums ${color}`}>{value}</div>
       {hint ? <div className="relative mt-1 text-xs text-slate-500">{hint}</div> : null}
