@@ -34,7 +34,6 @@ body {
     radial-gradient(40rem 30rem at 70% 60%, rgba(120, 128, 150, 0.1), transparent 62%),
     radial-gradient(50rem 36rem at 8% 100%, rgba(120, 128, 150, 0.12), transparent 62%),
     radial-gradient(46rem 34rem at 100% 0%, rgba(120, 128, 150, 0.09), transparent 62%);
-  background-attachment: fixed;
   min-height: 100vh;
 }
 
@@ -63,8 +62,6 @@ main {
 /* ── suprafețe: sticlă albă fină ── */
 .bg-white {
   background: var(--glass);
-  -webkit-backdrop-filter: blur(6px) saturate(125%);
-  backdrop-filter: blur(6px) saturate(125%);
   border-color: var(--glass-border);
   box-shadow: var(--glass-shadow);
 }
