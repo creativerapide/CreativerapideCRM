@@ -135,6 +135,9 @@ button:active { transform: scale(0.97); }
 .border-indigo-200 { border-color: rgba(0, 113, 227, 0.25); }
 .ring-emerald-600\/20, .ring-sky-600\/20, .ring-amber-600\/20, .ring-red-600\/20, .ring-indigo-600\/20, .ring-slate-500\/20 { --tw-ring-color: rgba(0, 0, 0, 0.06); }
 
+/* fara pete colorate in spatele cardurilor */
+.pointer-events-none.blur-2xl { display: none; }
+
 /* meniul activ */
 .nav-active {
   background: rgba(0, 0, 0, 0.06);
