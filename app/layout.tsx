@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import LiquidGlass from "@/components/LiquidGlass";
 
 export const metadata: Metadata = {
   title: "Creative Rapide · CRM",
@@ -10,7 +11,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ro" className="h-full antialiased">
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        {children}
+        <LiquidGlass />
+      </body>
     </html>
   );
 }
