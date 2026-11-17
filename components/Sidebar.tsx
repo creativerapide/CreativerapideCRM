@@ -53,7 +53,7 @@ export default function Sidebar({
   return (
     <>
       {/* bară de sus pe mobil */}
-      <div className="sticky top-2 z-30 mx-2 mt-2 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 lg:hidden">
+      <div className="sticky top-2 z-50 mx-2 mt-2 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 lg:hidden">
         <span className="text-sm font-semibold text-slate-900">Creative Rapide · CRM</span>
         <button
           onClick={() => setOpen((o) => !o)}
@@ -64,7 +64,7 @@ export default function Sidebar({
         </button>
       </div>
       {open ? (
-        <div className="fixed inset-x-2 top-[68px] z-20 max-h-[calc(100vh-80px)] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-lg lg:hidden">
+        <div className="fixed inset-x-2 top-[68px] z-40 max-h-[calc(100vh-80px)] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-lg lg:hidden">
           {showSearch ? <SearchBox /> : null}
           {nav}
           {footer}
@@ -72,7 +72,7 @@ export default function Sidebar({
       ) : null}
 
       {/* bară laterală pe desktop */}
-      <aside className="fixed inset-y-3 left-3 hidden w-60 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white lg:flex">
+      <aside className="fixed inset-y-3 left-3 z-40 hidden w-60 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white lg:flex">
         <div className="px-5 py-5">
           <div className="text-lg font-semibold tracking-tight text-slate-900">Creative Rapide</div>
           <div className="text-xs text-slate-500">CRM</div>
